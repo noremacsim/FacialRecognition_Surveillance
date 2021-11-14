@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  app:
+    image: bjoffe/openface_flask_v2
+    container_name: 'test_cctv'
+    tty: true
+    volumes:
+      - ./:/host/
+    ports:
+      - "5002:5000"
+    networks:
+      - default

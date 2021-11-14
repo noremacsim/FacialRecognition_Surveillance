@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en" class="perfect-scrollbar-off">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>
+        Home Surveillance
+    </title>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" name="viewport">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/paper-dashboard.css?v=2.0.1" rel="stylesheet">
+    <script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/46/12a/intl/en_gb/common.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/46/12a/intl/en_gb/util.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+<body class="">
+<div class="wrapper ">
+    <div class="sidebar" data-color="white" data-active-color="danger">
+        <div class="logo">
+            <a href="https://www.creative-tim.com" class="simple-text logo-mini">
+                <div class="logo-image-small">
+                    <img src="img/logo-small.png">
+                </div>
+            </a>
+            <a href="https://www.creative-tim.com" class="simple-text logo-normal">
+                Survilence Home
+            </a>
+        </div>
+        <div class="sidebar-wrapper">
+            <ul class="nav">
+                <li class="active ">
+                    <a href="./dashboard.html">
+                        <i class="nc-icon nc-bank"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="./icons.html">
+                        <i class="nc-icon nc-diamond"></i>
+                        <p>Icons</p>
+                    </a>
+                </li>
+                <li>
+
+                </li>
+                <li>
+
+                </li>
+                <li>
+
+                </li>
+                <li>
+
+                </li>
+                <li>
+
+                </li>
+                <li class="active-pro">
+
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="main-panel" style="height: 100%;">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
+            <div class="container-fluid">
+                <div class="navbar-wrapper">
+                    <div class="navbar-toggle">
+                        <button type="button" class="navbar-toggler">
+                            <span class="navbar-toggler-bar bar1"></span>
+                            <span class="navbar-toggler-bar bar2"></span>
+                            <span class="navbar-toggler-bar bar3"></span>
+                        </button>
+                    </div>
+                    <a class="navbar-brand" href="javascript:;">Paper Dashboard 2</a>
+                </div>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-bar navbar-kebab"></span>
+                    <span class="navbar-toggler-bar navbar-kebab"></span>
+                    <span class="navbar-toggler-bar navbar-kebab"></span>
+                </button>
+
+            </div>
+        </nav>
+        <!-- End Navbar -->
+        <div class="content">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 col-sm-6">
+                    <div class="card card-stats">
+                        <div class="card-body ">
+                            <div class="row">
+
+                                <div class="col-7 col-md-8">
+                                    <div class="numbers">
+                                        <p class="card-category" style="
+    float: left;
+">CPU Load</p>
+                                        <p>
+                                        </p></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer ">
+
+                            <div class="stats">
+                                <div class="progress">
+                                    <div class="progress-bar" id="cpu_usage" role="progressbar" aria-valuenow="40"
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6">
+                    <div class="card card-stats">
+                        <div class="card-body ">
+                            <div class="row">
+
+                                <div class="col-7 col-md-8">
+                                    <div class="numbers">
+                                        <p class="card-category" style="
+    float: left;
+">Memory Usage</p>
+                                        <p>
+                                        </p></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer ">
+
+                            <div class="stats">
+                                <div class="progress">
+                                    <div class="progress-bar" id="memory_usage" role="progressbar" aria-valuenow="40"
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="row mb-3" id="surveillance_panel">
+
+            </div>
+            <div class="row" id="facialBlock" style="display: none;">
+                <div class="col-md-12">
+                    <div class="card ">
+                        <div class="card-header ">
+                            <h5 class="card-title">Facial Recognition Results</h5>
+
+                        </div>
+                        <div class="card-body ">
+                            <div class="row" id="detected-faces">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row" id="controlPanel">
+
+                <div class="col-md-8">
+                    <div class="card card-chart">
+                        <div class="card-header">
+                            <h5 class="card-title">Camera Control Panel</h5>
+
+                        </div>
+                        <div class="card-body">
+                            <div class="box box-solid bg-green-gradient">
+                                <div class="box-header with-border ui-sortable-handle" style="cursor: move;">
+
+
+                                </div>
+                                <!-- /.box-header -->
+
+                                <div class="row">
+
+                                    <div class="col-12">
+                                        <div class="box-body">
+                                            <div class="">
+                                                <div class="box">
+                                                    <div class="box-header with-border ui-sortable-handle" style="cursor: move;">
+                                                        Cameras
+                                                    </div>
+                                                    <!-- /.box-header -->
+                                                    <div class="box-body">
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <div class="panel-body" id="system-cameras">
+
+                                                                </div>
+                                                            </div>
+                                                            <!-- /.col -->
+                                                        </div>
+                                                        <!-- /.row -->
+                                                    </div>
+                                                    <!-- ./box-body -->
+                                                    <!-- /.row -->
+                                                </div>
+                                                <!-- /.box-footer -->
+                                            </div>
+                                            <div class="">
+
+                                                <div class="form-group">
+                                                    <label>IP Camera URL</label>
+                                                    <input class="form-control" id="camURL" value="" placeholder="Enter stream URL">
+                                                </div>
+                                                <div class="form-group">
+
+
+                                                    <label>Video Processing Application</label>
+                                                    <select id="application" class="form-control">
+                                                        <!--<option value="detect_motion">Motion Detection</option>
+                                                        <option value="detect_recognise">Face Recognition</option>
+                                                        <option value="motion_detect_recognise">Motion Detection & Face Recognition</option>-->
+                                                        <option value="segment_detect_recognise">Motion Object Segmentation
+                                                            &amp; Face Recognition
+                                                        </option>
+                                                        <option value="detect_recognise_track">Face Recognition &amp; Tracking
+                                                        </option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label>Face Detection Method</label>
+                                                    <select id="detectionMethod" class="form-control">
+                                                        <option value="opencv">Opencv Haar Cascade</option>
+                                                        <option value="dlib">Dlib HOG Face Detector</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Check for many simultaneous cameras (FPS Tweak)</label>
+                                                    <input type="checkbox" id="fpstweak" value="fpstweak">
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                                <!-- /.box-body -->
+                                <div class="box-footer text-center">
+                                    <div class="btn-group pull-right" id="createcamerabutton">
+                                        <button type="button" id="addcam" onclick="addCamera()" class="btn btn-success btn-xs">
+                                            <i class="fa"></i> Add Camera
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- /.box-footer -->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+        </div>
+    </div>
+</div>
+<script src="js/core/jquery.min.js"></script>
+<script src="https://cdn.socket.io/4.3.2/socket.io.min.js" integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs" crossorigin="anonymous"></script>
+<script type="text/javascript" src="js/main.js">
+
+
+</script>
+<script src="js/core/popper.min.js"></script>
+<script src="js/core/bootstrap.min.js"></script>
+<script src="js/plugins/perfect-scrollbar.jquery.min.js"></script>
+<script src="js/plugins/chartjs.min.js"></script>
+<script src="js/plugins/bootstrap-notify.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,4 @@
+/Web/assets/** binary
+/Web/assets/* binary
+/Web/assets/* linguist-vendored
+/Web/assets/** linguist-vendored

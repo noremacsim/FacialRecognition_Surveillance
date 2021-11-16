@@ -44,16 +44,9 @@ logger.setLevel(logging.INFO)
 class SurveillanceSystem(object):
    def __init__(self):
         self.drawing = True
+        self.camerasLock = threading.Lock()
         self.cameras = [] # Holds all system cameras
-        self.camerasLock  = threading.Lock() # Used to block concurrent access of cameras []
         self.cameraProcessingThreads = []
-
-        # processing frame threads
-        for i, cam in enumerate(self.cameras):
-          thread = threading.Thread(name='frame_process_thread_' + str(i),target=self.process_frame,args=(cam,))
-          thread.daemon = False
-          self.cameraProcessingThreads.append(thread)
-          thread.start()
 
    def add_camera(self, camera):
         self.cameras.append(camera)
@@ -71,52 +64,52 @@ class SurveillanceSystem(object):
         self.captureThread.stop = False
 
 
-   def process_frame(self,camera):
-        logger.debug('Processing Frames')
+   #def process_frame(self,camera):
+   #     logger.debug('Processing Frames')
 
-        state = 1
-        frame_count = 0
-        FPScount = 0
-        FPSstart = time.time()
-        start = time.time()
-        #stop = camera.captureThread.stop
+   #     state = 1
+   #     frame_count = 0
+   #     FPScount = 0
+   #     FPSstart = time.time()
+   #     start = time.time()
+   #     #stop = camera.captureThread.stop
 
-        while True:
-            frame_count +=1
-            frame = camera.read_frame()
-            if frame is None or np.all(frame == camera.tempFrame):
-                continue
+   #     while True:
+   #         frame_count +=1
+   #         frame = camera.read_frame()
+   #         if frame is None or np.all(frame == camera.tempFrame):
+   #             continue
 
             # Resize the frame for better processing performance
             # Look at a way of processing a smaller frame but overlay on a larger
             #frame = ImageUtils.resize(frame)
 
             # Frame rate calculation
-            if FPScount == 6:
-                camera.processingFPS = 6/(time.time() - FPSstart)
-                FPSstart = time.time()
-                FPScount = 0
+   #         if FPScount == 6:
+   #             camera.processingFPS = 6/(time.time() - FPSstart)
+   #             FPSstart = time.time()
+   #             FPScount = 0
 
-            FPScount += 1
-            camera.tempFrame = frame
+   #         FPScount += 1
+   #         camera.tempFrame = frame
 
             # We will process every 5th frame for detection there is avarage 20 frames
             # per input of cctv this means we will be detecting 4 times minimuim per second
             # and improve output
-            if frame_count % 5 == 0:
+   #         if frame_count % 5 == 0:
 
                 # Get FaceBoxes of the detected areas
-                camera.faceBoxes = camera.faceDetector.detect_faces(frame,True)
+   #             camera.faceBoxes = camera.faceDetector.detect_faces(frame,True)
 
                 # If faces found is more than 0 well draw on frame
-                if len(camera.faceBoxes) > 0:
+   #             if len(camera.faceBoxes) > 0:
 
                     # We Will Draw the Boxes around the faces on the frame
-                    if self.drawing == True:
-                        facialFrame = ImageUtils.draw_boxes(frame, camera.faceBoxes, True)
-                        frame = facialFrame
+   #                 if self.drawing == True:
+   #                     facialFrame = ImageUtils.draw_boxes(frame, camera.faceBoxes, True)
+   #                     frame = facialFrame
 
-                # TODO: Crop face from rendered area and submit to recognition service. We don't need todo
+   #             # TODO: Crop face from rendered area and submit to recognition service. We don't need todo
                 # This live and can start a new thread so we arent slowing down the stream
 
-            camera.processing_frame = frame
+   #        camera.processing_frame = frame

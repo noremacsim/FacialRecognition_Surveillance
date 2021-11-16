@@ -1,3 +1,29 @@
+$(document).ready(function() {
+    $.ajax({
+        type:'GET',
+        url:'/get_cameras',
+        success:function(data) {
+            console.log(data);
+            var i = 0;
+            for (; i < data.camTotal; i++) {
+                cameraSettingHTML(i);
+            }
+
+            if (i === 0) {
+                $('#cameraList').append(`
+                    <div class="container" id="noCams">
+                      <div class="row justify-content-center">
+                        <h5>No Cameras added</h5>
+                      </div>
+                    </div>
+                `);
+            }
+        },
+        error: function(xhr, status, error){
+        }
+    })
+})
+
 function newCamera() {
     new swal({
         title: 'New Camera',
@@ -48,7 +74,7 @@ function newCamera() {
                 }
 
                 swal.close();
-                cameraSettingHTML(data);
+                cameraSettingHTML(data.camNum);
                 Swal.fire({
                     icon: 'success',
                     title: 'Camera Added Successfully',
@@ -75,19 +101,26 @@ function newCamera() {
 
 function cameraSettingHTML(cam) {
     let html = `
-        <div class="card col-xl-4 col-lg-6 mb-3 col-6">
-            <img class="card-img-top mt-2" id="cameraSrc-${cam.camNum}" src="/video_streamer/${cam.camNum}" alt="CCTV-${cam.camNum}">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-6" id="cameraAction-${cam.camNum}">
-                        <a href="#" class="btn btn-primary w-100" id="stopCamera" data-id="${cam.camNum}">Stop</a>
-                    </div>
-                    <div class="col-6">
-                        <a href="#" class="btn btn-danger w-100" id="removeCamera" data-id="${cam.camNum}">Remove</a>
+        <div class="col-xl-4 col-lg-6 col-xs-12 col-sm-6">
+            <div class="card m-3">
+                <img class="card-img-top mt-2" id="cameraSrc-${cam}" src="/video_streamer/${cam}" alt="CCTV-${cam}">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6" id="cameraAction-${cam}">
+                            <a href="#" class="btn btn-primary w-100" id="stopCamera" data-id="${cam}">Stop</a>
+                        </div>
+                        <div class="col-6">
+                            <a href="#" class="btn btn-danger w-100" id="removeCamera" data-id="${cam}">Remove</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>`;
+
+    if ($('#noCams').length) {
+        $('#noCams').remove();
+    }
+
     $('#cameraList').append(html);
 }
 

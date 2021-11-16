@@ -12,6 +12,7 @@ import Surveillance
 import MotionDetector
 import FaceDetector
 
+HomeSurveillance = Surveillance.SurveillanceSystem()
 logger = logging.getLogger(__name__)
 fileDir = os.path.dirname(os.path.realpath(__file__))
 modelDir = os.path.join(fileDir, '..', 'models')
@@ -53,10 +54,13 @@ class IPCamera(object):
         self.placeholder = os.path.join(assetImageDir, 'stream_placeholder.jpg')
         self.stop = True
         self.captureLock = threading.Lock()
-        self.captureThread = threading.Thread(name='video_captureThread',target=self.get_frame, daemon=True)
-        self.captureThread.daemon = True
-        self.captureThread.start()
-        self.captureThread.stop = False
+
+        # Start Camera Thread and append to HomeSurvilence Object
+        thread = threading.Thread(name='frame_process_thread_' + str(len(HomeSurveillance.cameras)),target=self.get_frame, daemon=True)
+        thread.daemon = True
+        thread.start()
+        thread.stop = False
+        HomeSurveillance.cameraProcessingThreads.append(thread)
 
     def __del__(self):
         self.video.release()
@@ -83,27 +87,11 @@ class IPCamera(object):
 
             FPScount += 1
 
-            if FPScount == 6:
-                self.streamingFPS = 6/(time.time() - FPSstart)
+            if FPScount == 5:
+                self.streamingFPS = 5/(time.time() - FPSstart)
                 FPSstart = time.time()
                 FPScount = 0
 
-            #if self.streamingFPS != 0:  # If frame rate gets too fast slow it down, if it gets too slow speed it up
-            #    if self.streamingFPS > CAPTURE_HZ:
-            #        time.sleep(1/CAPTURE_HZ)
-            #    else:
-            #        time.sleep(self.streamingFPS/(CAPTURE_HZ*CAPTURE_HZ))
-
-    def read_jpg(self):
-        frame = None
-        jpeg  = None
-        capture_blocker = None
-        ret = None
-        capture_blocker = self.captureEvent.wait()
-        frame = self.captureFrame
-        frame = ImageUtils.resize_mjpeg(frame)
-        ret, jpeg = cv2.imencode('.jpg', frame)
-        return jpeg.tostring()
 
     def read_frame(self):
         capture_blocker = None
@@ -125,9 +113,6 @@ class IPCamera(object):
             with self.captureLock:
                 frame = self.read_frame()
 
-        #Tempory Removed Maybe look at away of processing a small image and overlay
-        # on a larger 1:5 scale
-        #frame = ImageUtils.resize_mjpeg(frame)
         ret, jpeg = cv2.imencode('.jpg', frame)
         return jpeg.tostring()
 

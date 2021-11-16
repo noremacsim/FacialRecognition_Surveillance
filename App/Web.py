@@ -58,6 +58,14 @@ def add_camera():
     data = {'error': 'No Stream found and this URL'}
     return jsonify(data)
 
+@app.route('/remove_camera', methods = ['POST'])
+def remove_camera():
+    camID = request.form.get('camID')
+    with HomeSurveillance.camerasLock:
+        HomeSurveillance.remove_camera(camID)
+    data = {"alert_status": "removed"}
+    return jsonify(data)
+
 @app.route('/video_streamer/<camNum>')
 def video_streamer(camNum):
     """Used to stream frames to client, camNum represents the camera index in the cameras array"""
@@ -77,6 +85,11 @@ def setcamera():
         HomeSurveillance.cameras[int(camNum)].stop_camera()
 
     data = {'success': 'Successful'}
+    return jsonify(data)
+
+@app.route('/get_cameras', methods=['GET'])
+def get_cameras():
+    data = {'camTotal': len(HomeSurveillance.cameras)}
     return jsonify(data)
 
 def genFrame(camera):

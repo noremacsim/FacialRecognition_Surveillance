@@ -17,8 +17,12 @@ class FaceDetector(object):
     detector and Dlib's HOG based face detector"""
 
     def __init__(self):
-        self.facecascade = cv2.CascadeClassifier("cascades/haarcascade_frontalface_alt2.xml")
-        self.facecascade2 = cv2.CascadeClassifier("cascades/haarcascade_frontalface_alt2.xml")
+        self.facecascade = cv2.CascadeClassifier(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'Data/cascades/haarcascade_frontalface_alt.xml'))
+        self.facecascade2 = cv2.CascadeClassifier(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'Data/cascades/haarcascade_frontalface_alt2.xml'))
+        self.facecascade3 = cv2.CascadeClassifier(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..',
+        'Data/cascades/haarcascade_frontalface_default.xml'))
+        self.facecascade4 = cv2.CascadeClassifier(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..',
+        'Data/cascades/haarcascade_profileface.xml'))
         self.detector = dlib.get_frontal_face_detector()
         self.cascade_lock = threading.Lock()
         self.accurate_cascade_lock = threading.Lock()
@@ -35,7 +39,7 @@ class FaceDetector(object):
          grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
          clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
          cl1 = clahe.apply(grey)
-         # cv2.imwrite('clahe_2.jpg',cl1)
+         #cv2.imwrite('clahe_2.jpg',cl1)
          return cl1
 
 
@@ -77,7 +81,24 @@ class FaceDetector(object):
        
         with self.cascade_lock:  # Used to block simultaneous access to resource, stops segmentation fault when using more than one camera
             image = self.pre_processing(image)
-            rects = self.facecascade.detectMultiScale(image, scaleFactor=1.25, minNeighbors=3, minSize=(20, 20), flags = cv2.CASCADE_SCALE_IMAGE)
+
+            rects = self.facecascade.detectMultiScale(image, scaleFactor=1.02, minNeighbors=3, minSize=(20, 20),
+            flags=cv2.CASCADE_SCALE_IMAGE)
+
+            #if len(rects) < 1:
+            #    rects = self.facecascade2.detectMultiScale(image, scaleFactor=1.02, minNeighbors=3, minSize=(20, 20),
+            #    flags=cv2.CASCADE_SCALE_IMAGE)
+
+            ## Below Returns alot of false positive.
+            #if len(rects) < 1:
+            #    rects = self.facecascade3.detectMultiScale(image, scaleFactor=1.02, minNeighbors=3, minSize=(20, 20),
+            #    flags=cv2.CASCADE_SCALE_IMAGE)
+
+            ## Below Returns alot of false positive.
+            #if len(rects) < 1:
+            #    rects = self.facecascade4.detectMultiScale(image, scaleFactor=1.02, minNeighbors=3, minSize=(20, 20),
+            #    flags=cv2.CASCADE_SCALE_IMAGE)
+
         return rects
 
     def detect_cascadeface_accurate(self,img):

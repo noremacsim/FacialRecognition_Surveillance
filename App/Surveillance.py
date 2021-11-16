@@ -72,6 +72,7 @@ class SurveillanceSystem(object):
 
    def process_frame(self,camera):
         logger.debug('Processing Frames')
+
         state = 1
         frame_count = 0
         FPScount = 0
@@ -85,8 +86,9 @@ class SurveillanceSystem(object):
             if frame is None or np.all(frame == camera.tempFrame):
                 continue
 
-            frame = ImageUtils.resize(frame)
-            height, width, channels = frame.shape
+            # Resize the frame for better processing performance
+            # Look at a way of processing a smaller frame but overlay on a larger
+            #frame = ImageUtils.resize(frame)
 
             # Frame rate calculation
             if FPScount == 6:
@@ -97,29 +99,23 @@ class SurveillanceSystem(object):
             FPScount += 1
             camera.tempFrame = frame
 
-
-            # Look for motion detection in camera
-            camera.motion, peopleRects  = camera.motionDetector.detect_movement(frame, get_rects = True)
-            # Draw Boxes on Camera Frame
-            if self.drawing == True:
-                motionFrame = ImageUtils.draw_boxes(frame, peopleRects, False)
-
-            # If Motion is Detected we will carry on and do a face detection
-            if camera.motion == True:
+            # We will process every 5th frame for detection there is avarage 20 frames
+            # per input of cctv this means we will be detecting 4 times minimuim per second
+            # and improve output
+            if frame_count % 5 == 0:
 
                 # Get FaceBoxes of the detected areas
-                camera.faceBoxes = camera.faceDetector.detect_faces(frame,camera.dlibDetection)
+                camera.faceBoxes = camera.faceDetector.detect_faces(frame,True)
 
                 # If faces found is more than 0 well draw on frame
                 if len(camera.faceBoxes) > 0:
 
                     # We Will Draw the Boxes around the faces on the frame
                     if self.drawing == True:
-                        facialFrame = ImageUtils.draw_boxes(frame, camera.faceBoxes, camera.dlibDetection)
-                    frame = facialFrame
-                else:
-                    # No faces detected show motion
-                    frame = motionFrame
+                        facialFrame = ImageUtils.draw_boxes(frame, camera.faceBoxes, True)
+                        frame = facialFrame
 
-            # We will now set the camera frame, this will either be a motion box or facial detection
+                # TODO: Crop face from rendered area and submit to recognition service. We don't need todo
+                # This live and can start a new thread so we arent slowing down the stream
+
             camera.processing_frame = frame

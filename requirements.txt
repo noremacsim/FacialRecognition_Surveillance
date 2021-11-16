@@ -16,3 +16,4 @@ imagehash
 data
 helper
 psutil
+imageai

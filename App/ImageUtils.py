@@ -77,7 +77,7 @@ def crop(image, box, dlibRect = False):
 
     if dlibRect == False:
        x, y, w, h = box
-       return image[y: y + h, x: x + w] 
+       return image[y: y + h, x: x + w]
 
     return image[box.top():box.bottom(), box.left():box.right()]
 
@@ -94,12 +94,12 @@ def draw_boxes(image, rects, dlibrects):
    return image
 
 
-def draw_rects_cv(img, rects, color=(0, 40, 255)):
+def draw_rects_cv(img, rects, color=(0, 100, 0)):
     overlay = img.copy()
     output = img.copy()
     count = 1
     for x, y, w, h in rects:
-        cv2.rectangle(overlay, (x, y), (x+w, y+h), color, 2)
+        cv2.rectangle(overlay, (x, y), (x+w, y+h), color, thickness=2)
         cv2.addWeighted(overlay, 0.5, output, 0.5, 0, output)
     return output
    
@@ -216,5 +216,11 @@ def writeToFile(filename,lineString): # Used for writing testing data to file
        f = open(filename,"a") 
        f.write(lineString + "\n")    
        f.close()
+
+def shape_to_np(shape, dtype="int"):
+    coords = np.zeros((68, 2), dtype=dtype)
+    for i in range(0, 68):
+        coords[i] = (shape.part(i).x, shape.part(i).y)
+    return coords
 
 

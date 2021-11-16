@@ -124,6 +124,8 @@ class IPCamera(object):
             with self.captureLock:
                 frame = self.processing_frame
 
-        frame = ImageUtils.resize_mjpeg(frame)
+        #Tempory Removed Maybe look at away of processing a small image and overlay
+        # on a larger 1:5 scale
+        #frame = ImageUtils.resize_mjpeg(frame)
         ret, jpeg = cv2.imencode('.jpg', frame)
         return jpeg.tostring()

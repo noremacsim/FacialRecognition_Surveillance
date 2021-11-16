@@ -36,21 +36,66 @@ socketio = SocketIO(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    return render_template('index.html')
+    return render_template('home.html')
 
+@app.route('/cameras', methods=['GET', 'POST'])
+def cameras():
+    return render_template('camera.html')
 
-def gen(camera):
-    while True:
-        frame = camera.read_processed()    # read_jpg()  # read_processed()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')  # Builds 'jpeg' data with header and payload
+@app.route('/add_camera', methods=['POST'])
+def add_camera():
+    """Adds camera new camera to SurveillanceSystem's cameras array"""
+    camURL = request.form.get('camURL')
+    streamCheck = cv2.VideoCapture(camURL)
+    ret,frame = streamCheck.read()
+    if ret:
+        with HomeSurveillance.camerasLock:
+            HomeSurveillance.add_camera(Surveillance.Camera.IPCamera(camURL))
+            HomeSurveillance.cameras[len(HomeSurveillance.cameras) - 1].start_camera()
 
+        data = {"camNum": len(HomeSurveillance.cameras) - 1}
+        return jsonify(data)
+    data = {'error': 'No Stream found and this URL'}
+    return jsonify(data)
 
 @app.route('/video_streamer/<camNum>')
 def video_streamer(camNum):
     """Used to stream frames to client, camNum represents the camera index in the cameras array"""
-    return Response(gen(HomeSurveillance.cameras[int(camNum)]),
+    return Response(genFrame(HomeSurveillance.cameras[int(camNum)]),
                     mimetype='multipart/x-mixed-replace; boundary=frame')  # A stream where each part replaces the previous part the multipart/x-mixed-replace content type must be used.
+
+@app.route('/setcamera', methods=['POST'])
+def setcamera():
+    """Adds camera new camera to SurveillanceSystem's cameras array"""
+    camNum = request.form.get('camID')
+    action = request.form.get('action')
+
+    if action == 'start':
+        HomeSurveillance.cameras[int(camNum)].start_camera()
+
+    if action == 'stop':
+        HomeSurveillance.cameras[int(camNum)].stop_camera()
+
+    data = {'success': 'Successful'}
+    return jsonify(data)
+
+def genFrame(camera):
+
+    if camera.stop is True:
+        frame = camera.read_processed()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+    while True:
+        if camera.stop is True:
+            frame = camera.read_processed()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+            break
+
+        frame = camera.read_processed()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
 
 def system_monitoring():
@@ -78,28 +123,6 @@ def cpu_usage():
 def memory_usage():
     mem_usage = psutil.virtual_memory().percent
     return mem_usage
-
-
-@app.route('/add_camera', methods=['GET', 'POST'])
-def add_camera():
-    """Adds camera new camera to SurveillanceSystem's cameras array"""
-    if request.method == 'POST':
-        camURL = request.form.get('camURL')
-        application = request.form.get('application')
-        detectionMethod = request.form.get('detectionMethod')
-        fpsTweak = request.form.get('fpstweak')
-
-        with HomeSurveillance.camerasLock:
-            HomeSurveillance.add_camera(Surveillance.Camera.IPCamera(
-                camURL, application, detectionMethod, fpsTweak))
-
-        data = {"camNum": len(HomeSurveillance.cameras) - 1}
-        app.logger.info("Addding a new camera with url: ")
-        app.logger.info(camURL)
-        app.logger.info(fpsTweak)
-        return jsonify(data)
-    return render_template('index.html')
-
 
 @socketio.on('connect', namespace='/surveillance')
 def connect():

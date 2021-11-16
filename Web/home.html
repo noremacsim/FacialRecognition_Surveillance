@@ -1,0 +1,182 @@
+{% extends "structure/base.html" %}
+
+{% block content %}
+    <div class="content">
+        <div class="row">
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="card card-stats">
+                    <div class="card-body ">
+                        <div class="row">
+
+                            <div class="col-7 col-md-8">
+                                <div class="numbers">
+                                    <p class="card-category" style="
+        float: left;
+    ">CPU Load</p>
+                                    <p>
+                                    </p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer ">
+
+                        <div class="stats">
+                            <div class="progress">
+                                <div class="progress-bar" id="cpu_usage" role="progressbar" aria-valuenow="40"
+                                     aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="card card-stats">
+                    <div class="card-body ">
+                        <div class="row">
+
+                            <div class="col-7 col-md-8">
+                                <div class="numbers">
+                                    <p class="card-category" style="
+        float: left;
+    ">Memory Usage</p>
+                                    <p>
+                                    </p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer ">
+
+                        <div class="stats">
+                            <div class="progress">
+                                <div class="progress-bar" id="memory_usage" role="progressbar" aria-valuenow="40"
+                                     aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="row mb-3" id="surveillance_panel">
+
+        </div>
+        <div class="row" id="facialBlock" style="display: none;">
+            <div class="col-md-12">
+                <div class="card ">
+                    <div class="card-header ">
+                        <h5 class="card-title">Facial Recognition Results</h5>
+
+                    </div>
+                    <div class="card-body ">
+                        <div class="row" id="detected-faces">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row" id="controlPanel">
+
+            <div class="col-md-8">
+                <div class="card card-chart">
+                    <div class="card-header">
+                        <h5 class="card-title">Camera Control Panel</h5>
+
+                    </div>
+                    <div class="card-body">
+                        <div class="box box-solid bg-green-gradient">
+                            <div class="box-header with-border ui-sortable-handle" style="cursor: move;">
+
+
+                            </div>
+                            <!-- /.box-header -->
+
+                            <div class="row">
+
+                                <div class="col-12">
+                                    <div class="box-body">
+                                        <div class="">
+                                            <div class="box">
+                                                <div class="box-header with-border ui-sortable-handle" style="cursor: move;">
+                                                    Cameras
+                                                </div>
+                                                <!-- /.box-header -->
+                                                <div class="box-body">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="panel-body" id="system-cameras">
+
+                                                            </div>
+                                                        </div>
+                                                        <!-- /.col -->
+                                                    </div>
+                                                    <!-- /.row -->
+                                                </div>
+                                                <!-- ./box-body -->
+                                                <!-- /.row -->
+                                            </div>
+                                            <!-- /.box-footer -->
+                                        </div>
+                                        <div class="">
+
+                                            <div class="form-group">
+                                                <label>IP Camera URL</label>
+                                                <input class="form-control" id="camURL" value="" placeholder="Enter stream URL">
+                                            </div>
+                                            <div class="form-group">
+
+
+                                                <label>Video Processing Application</label>
+                                                <select id="application" class="form-control">
+                                                    <!--<option value="detect_motion">Motion Detection</option>
+                                                    <option value="detect_recognise">Face Recognition</option>
+                                                    <option value="motion_detect_recognise">Motion Detection & Face Recognition</option>-->
+                                                    <option value="segment_detect_recognise">Motion Object Segmentation
+                                                        &amp; Face Recognition
+                                                    </option>
+                                                    <option value="detect_recognise_track">Face Recognition &amp; Tracking
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Face Detection Method</label>
+                                                <select id="detectionMethod" class="form-control">
+                                                    <option value="opencv">Opencv Haar Cascade</option>
+                                                    <option value="dlib">Dlib HOG Face Detector</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Check for many simultaneous cameras (FPS Tweak)</label>
+                                                <input type="checkbox" id="fpstweak" value="fpstweak">
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                            <!-- /.box-body -->
+                            <div class="box-footer text-center">
+                                <div class="btn-group pull-right" id="createcamerabutton">
+                                    <button type="button" id="addcam" onclick="addCamera()" class="btn btn-success btn-xs">
+                                        <i class="fa"></i> Add Camera
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- /.box-footer -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

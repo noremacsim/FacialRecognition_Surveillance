@@ -57,18 +57,19 @@ class SurveillanceSystem(object):
 
    def add_camera(self, camera):
         self.cameras.append(camera)
-        thread = threading.Thread(name='frame_process_thread_' +
-                                 str(len(self.cameras)),
-                                 target=self.process_frame,
-                                 args=(self.cameras[-1],))
-        thread.daemon = False
-        self.cameraProcessingThreads.append(thread)
-        thread.start()
+        #thread = threading.Thread(name='frame_process_thread_' +
+        #                         str(len(self.cameras)),
+        #                         target=self.process_frame,
+        #                         args=(self.cameras[-1],))
+        #thread.daemon = False
+        #self.cameraProcessingThreads.append(thread)
+        #thread.start()
 
    def remove_camera(self, camID):
         self.cameras.pop(camID)
         self.cameraProcessingThreads.pop(camID)
         self.captureThread.stop = False
+
 
    def process_frame(self,camera):
         logger.debug('Processing Frames')
@@ -78,9 +79,9 @@ class SurveillanceSystem(object):
         FPScount = 0
         FPSstart = time.time()
         start = time.time()
-        stop = camera.captureThread.stop
+        #stop = camera.captureThread.stop
 
-        while not stop:
+        while True:
             frame_count +=1
             frame = camera.read_frame()
             if frame is None or np.all(frame == camera.tempFrame):

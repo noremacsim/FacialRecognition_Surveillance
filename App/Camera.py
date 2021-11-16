@@ -15,6 +15,7 @@ import FaceDetector
 logger = logging.getLogger(__name__)
 fileDir = os.path.dirname(os.path.realpath(__file__))
 modelDir = os.path.join(fileDir, '..', 'models')
+assetImageDir = os.path.join(fileDir, '..', 'Web/assets/img')
 dlibModelDir = os.path.join(modelDir, 'dlib')
 openfaceModelDir = os.path.join(modelDir, 'openface')
 parser = argparse.ArgumentParser()
@@ -26,8 +27,8 @@ args = parser.parse_args()
 CAPTURE_HZ = 30.0 # Determines frame rate at which frames are captured from IP camera
 
 class IPCamera(object):
-    def __init__(self,camURL, cameraFunction, dlibDetection, fpsTweak):
-        logger.info("Loading Stream From IP Camera: " + camURL)
+    def __init__(self,camURL):
+        print("Loading Stream From IP Camera: " + camURL)
         self.motionDetector = MotionDetector.MotionDetector()
         self.faceDetector = FaceDetector.FaceDetector()
         self.processing_frame = None
@@ -40,26 +41,19 @@ class IPCamera(object):
         self.motion = False # Used for alerts and transistion between system states i.e from motion detection to face detection
         self.people = {} # Holds person ID and corresponding person object
         self.trackers = [] # Holds all alive trackers
-        self.cameraFunction = cameraFunction
-        self.dlibDetection = dlibDetection # Used to choose detection method for camera (dlib - True vs opencv - False)
-        self.fpsTweak = fpsTweak # used to know if we should apply the FPS work around when you have many cameras
         self.rgbFrame = None
         self.faceBoxes = None
         self.captureEvent = threading.Event()
         self.captureEvent.set()
         self.peopleDictLock = threading.Lock() # Used to block concurrent access to people dictionary
-        self.video = cv2.VideoCapture(camURL) # VideoCapture object used to capture frames from IP camera
+        self.video = cv2.VideoCapture(camURL)
         self.url = camURL
-
         if not self.video.isOpened():
             self.video.open()
-
-        logger.info("Video feed open.")
-        #self.dump_video_info()  # logging every specs of the video feed
-        # Start a thread to continuously capture frames.
-        # The capture thread ensures the frames being processed are up to date and are not old
-        self.captureLock = threading.Lock() # Sometimes used to prevent concurrent access
-        self.captureThread = threading.Thread(name='video_captureThread',target=self.get_frame)
+        self.placeholder = os.path.join(assetImageDir, 'stream_placeholder.jpg')
+        self.stop = True
+        self.captureLock = threading.Lock()
+        self.captureThread = threading.Thread(name='video_captureThread',target=self.get_frame, daemon=True)
         self.captureThread.daemon = True
         self.captureThread.start()
         self.captureThread.stop = False
@@ -73,6 +67,10 @@ class IPCamera(object):
         FPSstart = time.time()
 
         while True:
+
+            if self.stop is True:
+                continue
+
             success, frame = self.video.read()
             self.captureEvent.clear()
 
@@ -115,17 +113,27 @@ class IPCamera(object):
         return frame
 
     def read_processed(self):
+        if self.stop is True:
+            return open(self.placeholder, 'rb').read()
+
         frame = None
         jpeg  = None
         ret = None
         with self.captureLock:
-            frame = self.processing_frame
+            frame = self.read_frame()
         while frame is None:
             with self.captureLock:
-                frame = self.processing_frame
+                frame = self.read_frame()
 
         #Tempory Removed Maybe look at away of processing a small image and overlay
         # on a larger 1:5 scale
         #frame = ImageUtils.resize_mjpeg(frame)
         ret, jpeg = cv2.imencode('.jpg', frame)
         return jpeg.tostring()
+
+    def start_camera(self):
+        self.stop = False
+
+    def stop_camera(self):
+        self.stop = True
+

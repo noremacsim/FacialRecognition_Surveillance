@@ -1,0 +1,22 @@
+{% extends "structure/base.html" %}
+
+{% block content %}
+<div class="content">
+    <div class="row bg-light p-2 rounded" id="cameraList">
+        <div class="row col-12 border-bottom mb-3">
+            <div class="col-6">
+                <h3 class="position-absolute fixed-bottom pb-3 mb-0">Camera List</h3>
+            </div>
+            <div class="col-6">
+                <button type="button" onclick="newCamera()" class="btn btn-primary btn-lg float-right">
+                    New Camera
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+    <script src="js/cameras.js"></script>
+{% endblock %}

@@ -22,9 +22,9 @@ LOG_FILE = 'logs/WebApp.log'
 HomeSurveillance = Surveillance.SurveillanceSystem()
 
 # Threads used to continuously push data to the client
-facesUpdateThread = threading.Thread()
+#facesUpdateThread = threading.Thread()
 monitoringThread = threading.Thread()
-facesUpdateThread.daemon = False
+#facesUpdateThread.daemon = False
 monitoringThread.daemon = False
 
 # Flask setup
@@ -63,7 +63,7 @@ def remove_camera():
     camID = request.form.get('camID')
     with HomeSurveillance.camerasLock:
         HomeSurveillance.remove_camera(camID)
-    data = {"alert_status": "removed"}
+    data = {"success": "success"}
     return jsonify(data)
 
 @app.route('/video_streamer/<camNum>')
@@ -114,12 +114,7 @@ def genFrame(camera):
 def system_monitoring():
     """Pushes system monitoring data to client"""
     while True:
-        cameraProcessingFPS = []
-        for camera in HomeSurveillance.cameras:
-            cameraProcessingFPS.append("{0:.2f}".format(camera.processingFPS))
-
-        systemState = {'cpu': cpu_usage(), 'memory': memory_usage(),
-                       'processingFPS': cameraProcessingFPS}
+        systemState = {'cpu': cpu_usage(), 'memory': memory_usage()}
         socketio.emit('system_monitoring', json.dumps(
             systemState), namespace='/surveillance')
         time.sleep(3)

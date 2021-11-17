@@ -50,6 +50,7 @@ class SurveillanceSystem(object):
 
    def add_camera(self, camera):
         self.cameras.append(camera)
+        self.cameraProcessingThreads.append(camera.thread)
         #thread = threading.Thread(name='frame_process_thread_' +
         #                         str(len(self.cameras)),
         #                         target=self.process_frame,
@@ -59,9 +60,12 @@ class SurveillanceSystem(object):
         #thread.start()
 
    def remove_camera(self, camID):
-        self.cameras.pop(camID)
-        self.cameraProcessingThreads.pop(camID)
-        self.captureThread.stop = False
+        self.cameras[int(camID)].stopThread = True
+        self.cameraProcessingThreads[int(camID)].stop = True
+        self.cameraProcessingThreads.pop(int(camID))
+        self.cameras[int(camID)].stop_camera = True
+        self.cameras[int(camID)].thread.stop  = True
+        self.cameras.pop(int(camID))
 
 
    #def process_frame(self,camera):

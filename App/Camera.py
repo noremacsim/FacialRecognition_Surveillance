@@ -29,70 +29,64 @@ CAPTURE_HZ = 30.0 # Determines frame rate at which frames are captured from IP c
 
 class IPCamera(object):
     def __init__(self,camURL):
-        print("Loading Stream From IP Camera: " + camURL)
+
+        # Define Libarys required for each camera
         self.motionDetector = MotionDetector.MotionDetector()
         self.faceDetector = FaceDetector.FaceDetector()
+
         self.processing_frame = None
         self.tempFrame = None
         self.captureFrame  = None
-        self.streamingFPS = 0 # Streaming frame rate per second
-        self.processingFPS = 0
-        self.FPSstart = time.time()
-        self.FPScount = 0
-        self.motion = False # Used for alerts and transistion between system states i.e from motion detection to face detection
-        self.people = {} # Holds person ID and corresponding person object
-        self.trackers = [] # Holds all alive trackers
-        self.rgbFrame = None
-        self.faceBoxes = None
+
         self.captureEvent = threading.Event()
         self.captureEvent.set()
-        self.peopleDictLock = threading.Lock() # Used to block concurrent access to people dictionary
-        self.video = cv2.VideoCapture(camURL)
+
+        # Variables
         self.url = camURL
-        if not self.video.isOpened():
-            self.video.open()
         self.placeholder = os.path.join(assetImageDir, 'stream_placeholder.jpg')
         self.stop = True
+        self.stopThread = False
         self.captureLock = threading.Lock()
 
-        # Start Camera Thread and append to HomeSurvilence Object
-        thread = threading.Thread(name='frame_process_thread_' + str(len(HomeSurveillance.cameras)),target=self.get_frame, daemon=True)
-        thread.daemon = True
-        thread.start()
-        thread.stop = False
-        HomeSurveillance.cameraProcessingThreads.append(thread)
+        # Stream Capture Details and settings
+        self.video = cv2.VideoCapture(camURL)
+        self.video.set(cv2.CAP_PROP_BUFFERSIZE, 3)
+        self.FPS = 1/30
+        self.FPS_MS = int(self.FPS * 1000)
+        if not self.video.isOpened():
+            self.video.open()
+
+        # Start frame retrieval thread
+        self.thread = threading.Thread(target=self.get_frame, args=())
+        self.thread.daemon = True
+        self.thread.start()
 
     def __del__(self):
         self.video.release()
 
+    # Get frame from video Stream and save to global captureFrame
     def get_frame(self):
-        frame = None
-        FPScount = 0
-        FPSstart = time.time()
+        # Set FPS of the stream
+        self.FPS = 1/self.video.get(cv2.CAP_PROP_FPS)
 
         while True:
-
             if self.stop is True:
                 continue
 
-            success, frame = self.video.read()
-            self.captureEvent.clear()
+            if self.video.isOpened():
+                (self.status, self.captureFrame) = self.video.read()
 
-            if not success:
-                continue
+                if not self.status:
+                    continue
 
-            if success:
-                self.captureFrame  = frame
                 self.captureEvent.set()
 
-            FPScount += 1
 
-            if FPScount == 5:
-                self.streamingFPS = 5/(time.time() - FPSstart)
-                FPSstart = time.time()
-                FPScount = 0
+            if self.stopThread is True:
+                break
+            time.sleep(self.FPS)
 
-
+    # Read standard frame
     def read_frame(self):
         capture_blocker = None
         frame = None
@@ -100,6 +94,7 @@ class IPCamera(object):
         frame = self.captureFrame
         return frame
 
+    # Read Frame After ot has been processed
     def read_processed(self):
         if self.stop is True:
             return open(self.placeholder, 'rb').read()

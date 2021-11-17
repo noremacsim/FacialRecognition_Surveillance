@@ -1,27 +1,5 @@
 $(document).ready(function() {
-    $.ajax({
-        type:'GET',
-        url:'/get_cameras',
-        success:function(data) {
-            console.log(data);
-            var i = 0;
-            for (; i < data.camTotal; i++) {
-                cameraSettingHTML(i);
-            }
-
-            if (i === 0) {
-                $('#cameraList').append(`
-                    <div class="container" id="noCams">
-                      <div class="row justify-content-center">
-                        <h5>No Cameras added</h5>
-                      </div>
-                    </div>
-                `);
-            }
-        },
-        error: function(xhr, status, error){
-        }
-    })
+    getCameraList();
 })
 
 function newCamera() {
@@ -101,7 +79,7 @@ function newCamera() {
 
 function cameraSettingHTML(cam) {
     let html = `
-        <div class="col-xl-4 col-lg-6 col-xs-12 col-sm-6">
+        <div class="col-xl-4 col-lg-6 col-xs-12 col-sm-6 cameraListClass" id="camContainer-${cam}">
             <div class="card m-3">
                 <img class="card-img-top mt-2" id="cameraSrc-${cam}" src="/video_streamer/${cam}" alt="CCTV-${cam}">
                 <div class="card-body">
@@ -150,6 +128,18 @@ $(document).on('click', '#stopCamera', function(e) {
     stopCamera($(this).data('id'));
 })
 
+$(document).on('click', '#removeCamera', function(e) {
+    e.preventDefault()
+    let id = $(this).data('id')
+    $.ajax({
+        type:'POST',
+        data:{'camID':id},
+        url:'/remove_camera',
+    }).done(function() {
+        getCameraList();
+    })
+})
+
 function stopCamera(id) {
     $.ajax({
         type:'POST',
@@ -161,6 +151,38 @@ function stopCamera(id) {
         },
         error: function(xhr, status, error){
             //console.log(data);
+        }
+    })
+}
+
+function getCameraList() {
+    if ($('.cameraListClass').length) {
+        $('.cameraListClass').each(function(){
+            $(this).remove()
+        });
+    }
+
+    $.ajax({
+        type:'GET',
+        url:'/get_cameras',
+        success:function(data) {
+            console.log(data);
+            var i = 0;
+            for (; i < data.camTotal; i++) {
+                cameraSettingHTML(i);
+            }
+
+            if (i === 0) {
+                $('#cameraList').append(`
+                    <div class="container" id="noCams">
+                      <div class="row justify-content-center">
+                        <h5>No Cameras added</h5>
+                      </div>
+                    </div>
+                `);
+            }
+        },
+        error: function(xhr, status, error){
         }
     })
 }

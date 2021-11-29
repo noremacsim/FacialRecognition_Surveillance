@@ -82,12 +82,12 @@ class FaceDetector(object):
         with self.cascade_lock:  # Used to block simultaneous access to resource, stops segmentation fault when using more than one camera
             image = self.pre_processing(image)
 
-            rects = self.facecascade.detectMultiScale(image, scaleFactor=1.02, minNeighbors=3, minSize=(20, 20),
+            rects = self.facecascade.detectMultiScale(image, scaleFactor=1.02, minNeighbors=4, minSize=(20, 20),
             flags=cv2.CASCADE_SCALE_IMAGE)
 
-            #if len(rects) < 1:
-            #    rects = self.facecascade2.detectMultiScale(image, scaleFactor=1.02, minNeighbors=3, minSize=(20, 20),
-            #    flags=cv2.CASCADE_SCALE_IMAGE)
+            if len(rects) < 1:
+                rects = self.facecascade2.detectMultiScale(image, scaleFactor=1.02, minNeighbors=4, minSize=(20, 20),
+                flags=cv2.CASCADE_SCALE_IMAGE)
 
             ## Below Returns alot of false positive.
             #if len(rects) < 1:

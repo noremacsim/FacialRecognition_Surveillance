@@ -47,6 +47,8 @@ class SurveillanceSystem(object):
         self.camerasLock = threading.Lock()
         self.cameras = [] # Holds all system cameras
         self.cameraProcessingThreads = []
+        self.surveillanceProcessingThreads = []
+
 
    def add_camera(self, camera):
         self.cameras.append(camera)
@@ -56,64 +58,59 @@ class SurveillanceSystem(object):
         #                         target=self.process_frame,
         #                         args=(self.cameras[-1],))
         #thread.daemon = False
-        #self.cameraProcessingThreads.append(thread)
+        #self.surveillanceProcessingThreads.append(thread)
         #thread.start()
 
    def remove_camera(self, camID):
         self.cameras[int(camID)].stopThread = True
         self.cameraProcessingThreads[int(camID)].stop = True
         self.cameraProcessingThreads.pop(int(camID))
+        self.surveillanceProcessingThreads[int(camID)].stop = True
+        self.surveillanceProcessingThreads.pop(int(camID))
         self.cameras[int(camID)].stop_camera = True
         self.cameras[int(camID)].thread.stop  = True
         self.cameras.pop(int(camID))
 
 
-   #def process_frame(self,camera):
-   #     logger.debug('Processing Frames')
+   def process_frame(self,camera):
+        print("processing frames")
 
-   #     state = 1
-   #     frame_count = 0
-   #     FPScount = 0
-   #     FPSstart = time.time()
-   #     start = time.time()
-   #     #stop = camera.captureThread.stop
+        state = 1
+        frame_count = 0
+        FPScount = 0
+        FPSstart = time.time()
+        start = time.time()
 
-   #     while True:
-   #         frame_count +=1
-   #         frame = camera.read_frame()
-   #         if frame is None or np.all(frame == camera.tempFrame):
-   #             continue
+        while True:
+            frame_count +=1
+            frame = camera.captureFrame
+            if frame is None or np.array_equal(frame, camera.tempFrame):
+                continue
 
             # Resize the frame for better processing performance
             # Look at a way of processing a smaller frame but overlay on a larger
-            #frame = ImageUtils.resize(frame)
+            frame = ImageUtils.resize(frame)
 
             # Frame rate calculation
-   #         if FPScount == 6:
-   #             camera.processingFPS = 6/(time.time() - FPSstart)
-   #             FPSstart = time.time()
-   #             FPScount = 0
+            if FPScount == 6:
+                camera.processingFPS = 6/(time.time() - FPSstart)
+                FPSstart = time.time()
+                FPScount = 0
 
-   #         FPScount += 1
-   #         camera.tempFrame = frame
+            FPScount += 1
 
-            # We will process every 5th frame for detection there is avarage 20 frames
-            # per input of cctv this means we will be detecting 4 times minimuim per second
-            # and improve output
-   #         if frame_count % 5 == 0:
+            camera.tempFrame = frame
 
-                # Get FaceBoxes of the detected areas
-   #             camera.faceBoxes = camera.faceDetector.detect_faces(frame,True)
+            # Get FaceBoxes of the detected areas
+            camera.faceBoxes = camera.faceDetector.detect_faces(frame,False)
 
-                # If faces found is more than 0 well draw on frame
-   #             if len(camera.faceBoxes) > 0:
+            # If faces found is more than 0 well draw on frame
+            if len(camera.faceBoxes) > 0:
 
-                    # We Will Draw the Boxes around the faces on the frame
-   #                 if self.drawing == True:
-   #                     facialFrame = ImageUtils.draw_boxes(frame, camera.faceBoxes, True)
-   #                     frame = facialFrame
+                # We Will Draw the Boxes around the faces on the frame
+                if self.drawing == True:
+                    facialFrame = ImageUtils.draw_boxes(frame, camera.faceBoxes, False)
+                    frame = facialFrame
 
-   #             # TODO: Crop face from rendered area and submit to recognition service. We don't need todo
-                # This live and can start a new thread so we arent slowing down the stream
 
-   #        camera.processing_frame = frame
+            camera.processing_frame = frame

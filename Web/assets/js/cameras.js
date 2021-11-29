@@ -131,6 +131,7 @@ $(document).on('click', '#stopCamera', function(e) {
 $(document).on('click', '#removeCamera', function(e) {
     e.preventDefault()
     let id = $(this).data('id')
+    stopCamera(id);
     $.ajax({
         type:'POST',
         data:{'camID':id},

@@ -9,8 +9,8 @@ import os
 import argparse
 import logging
 import Surveillance
-import MotionDetector
 import FaceDetector
+import FaceExtracter
 
 HomeSurveillance = Surveillance.SurveillanceSystem()
 logger = logging.getLogger(__name__)
@@ -30,14 +30,14 @@ CAPTURE_HZ = 30.0 # Determines frame rate at which frames are captured from IP c
 class IPCamera(object):
     def __init__(self,camURL):
 
-        # Define Libarys required for each camera
-        self.motionDetector = MotionDetector.MotionDetector()
-        self.faceDetector = FaceDetector.FaceDetector()
+        self.detectFace = FaceDetector.FaceDetector()
 
         self.processing_frame = None
         self.tempFrame = None
         self.captureFrame  = None
+        self.count = 0
 
+        self.peopleDictLock = threading.Lock() # Used to block concurrent access to people dictionary
         self.captureEvent = threading.Event()
         self.captureEvent.set()
 
@@ -74,7 +74,10 @@ class IPCamera(object):
                 continue
 
             if self.video.isOpened():
-                (self.status, self.captureFrame) = self.video.read()
+                (self.status, frame) = self.video.read()
+                self.captureFrame = ImageUtils.resize(frame)
+                threading.Thread(target=self.extract_face).start()
+
 
                 if not self.status:
                     continue
@@ -116,4 +119,20 @@ class IPCamera(object):
 
     def stop_camera(self):
         self.stop = True
+
+    def extract_face(self):
+        self.faceBoxes = self.detectFace.detect_faces(self.captureFrame,False)
+        if len(self.faceBoxes) > 0:
+            frame = ImageUtils.draw_boxes(self.captureFrame, self.faceBoxes, False)
+            for face_bb in self.faceBoxes:
+                x, y, w, h = face_bb
+                face_bb = dlib.rectangle(int(x), int(y), int(x+w), int(y+h))
+                faceimg = ImageUtils.crop(self.captureFrame, face_bb, dlibRect = True)
+                #if len(self.detectFace.detect_cascadeface_accurate(faceimg)) == 0:
+                #    continue
+                print("Face Found")
+                cv2.imwrite("test/frame-%d.jpg" % self.count, frame)     # save frame as JPEG file
+                cv2.imwrite("test/face-%d.jpg" % self.count, faceimg)     # save frame as JPEG file
+                self.count += 1
+
 
